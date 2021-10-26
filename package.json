@@ -1,0 +1,19 @@
+{
+  "name": "spotdpothole",
+  "version": "1.0.0",
+  "description": "A pothole reporting application.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Boldoosang/NULLIFY-finalProject.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Boldoosang/NULLIFY-finalProject/issues"
+  },
+  "homepage": "https://github.com/Boldoosang/NULLIFY-finalProject#readme"
+}
