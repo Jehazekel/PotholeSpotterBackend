@@ -1,15 +1,14 @@
 from flask_script import Manager
 from App.main import app
-from App.models import db
 import os
-
 manager = Manager(app)
 
-from App.models import *
+from App.models import Pothole, User, Report, ReportedImage, db
 
 @manager.command
 def initDB():
     db.create_all(app=app)
+    db.session.commit()
     print('Database Initialized!')
 
 @manager.command

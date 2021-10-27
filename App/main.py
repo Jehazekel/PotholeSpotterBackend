@@ -4,7 +4,7 @@ from datetime import timedelta
 from sqlalchemy.exc import IntegrityError, OperationalError
 import json
 
-from App.models import *
+from App.models import Pothole, User, Report, ReportedImage, db
 from App.views import *
 
 def loadConfig(app):
@@ -25,8 +25,11 @@ app = create_app()
 app.app_context().push()
 jwt = JWTManager(app)
 
-#app.register_blueprint(api_views)
+app.register_blueprint(potholeViews)
 app.register_blueprint(userViews)
+app.register_blueprint(reportedImageViews)
+app.register_blueprint(reportViews)
+
 
 
 '''AUTH'''

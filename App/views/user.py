@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, request, jsonify, send_from_directory
 
 userViews = Blueprint('userViews', __name__)
 
-from App.models import User
+from App.models import *
 from App.controllers import *
 
 
