@@ -8,17 +8,20 @@ from App.models import *
 def identity(payload):
   return db.session.query(User).get(payload['identity'])
 
-def authenticate(username, password):
-    user = User.filter_by(username=username).first()
+def authenticate(email, password):
+    user = User.filter_by(email=email).first()
     if user and user.checkPassword(password):
         return user
 
 def registerUserController(regData):  
     if regData:
-        if "username" in regData and "firstName" in regData and "lastName" in regData and "password" in regData and "confirmPassword" in regData:
-            parsedUsername = regData["username"].replace(" ", "")
+        if "email" in regData and "firstName" in regData and "lastName" in regData and "password" in regData and "confirmPassword" in regData:
+            parsedEmail = regData["email"].replace(" ", "")
             parsedFirstName = regData["firstName"].replace(" ", "")
             parsedLastName = regData["lastName"].replace(" ", "")
+
+            if len(parsedEmail) < 3 or not "@" in parsedEmail or not "." in parsedEmail:
+                return {"error" : "Email is invalid!"}
 
             if len(parsedFirstName) < 2:
                 return {"error" : "First name is invalid!"}
@@ -33,7 +36,7 @@ def registerUserController(regData):
                 return {"error" : "Passwords do not match!"}
 
             try:
-                newUser = User(parsedUsername, parsedFirstName, parsedLastName, regData["password"])
+                newUser = User(parsedEmail, parsedFirstName, parsedLastName, regData["password"])
                 db.session.add(newUser)
                 db.session.commit()
                 return {"message" : "Sucesssfully registered!"}
@@ -51,20 +54,20 @@ def registerUserController(regData):
 
 def loginUserController(loginDetails):  
     if loginDetails:
-        if "username" in loginDetails and "password" in loginDetails:
-            userAccount = User.query.filter_by(username=loginDetails["username"]).first()
+        if "email" in loginDetails and "password" in loginDetails:
+            userAccount = User.query.filter_by(email=loginDetails["email"]).first()
             
             if not userAccount or not userAccount.checkPassword(loginDetails["password"]):
-                return {"error" : "Wrong username or password entered!"}
+                return {"error" : "Wrong email or password entered!"}
 
             if userAccount and userAccount.checkPassword(loginDetails["password"]):
-                access_token = create_access_token(identity = loginDetails["username"])
+                access_token = create_access_token(identity = loginDetails["email"])
                 return {"access_token" : access_token}
 
     return {"error" : "Invalid login details provided!"}
 
 def identifyUser(current_user):
     if current_user:
-        return {"username" : current_user.username, "firstName" : current_user.firstName, "lastName": current_user.lastName}
+        return {"email" : current_user.email, "firstName" : current_user.firstName, "lastName": current_user.lastName}
     
     return json.dumps({"error" : "User is not logged in!"})
