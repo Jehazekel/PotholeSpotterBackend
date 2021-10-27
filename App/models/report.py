@@ -1,13 +1,14 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
-db = SQLAlchemy()
+from .sharedDB import db
 
 class Report(db.Model):
     reportID = db.Column(db.Integer, primary_key = True)
-    userID = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    #potholeID {FK}
+    userID = db.Column(db.Integer, db.ForeignKey("user.userID"), nullable = False)
+    potholeID = db.Column(db.Integer, db.ForeignKey("pothole.potholeID"), nullable=False)
     description = db.Column(db.String(500), nullable = True)
-    dateReported = db.Column(db.Date, nullable = False)
+    dateReported = db.Column(db.Date, nullable = False, default=datetime.utcnow)
     reportedImages = db.relationship('ReportedImage', backref='report')
     
 
@@ -18,5 +19,5 @@ class Report(db.Model):
             "potholeID" : self.potholeID,
             "dateReported" : self.dateReported,
             "description" : self.description,
-            "reportedImages" : self.imageURL
+            "reportedImages" : [rImage.toDict() for rImage in reportedImages]
         }

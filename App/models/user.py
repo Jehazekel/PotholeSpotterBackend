@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-db = SQLAlchemy()
+from .sharedDB import db
 
 class User(db.Model):
     userID = db.Column(db.Integer, primary_key = True)
@@ -9,7 +9,7 @@ class User(db.Model):
     firstName = db.Column(db.String(64), nullable = False)
     lastName = db.Column(db.String(64), nullable = False)
     password = db.Column(db.String(256), nullable = False)
-    #reports = db.relationship('Report', backref='user')
+    reports = db.relationship('Report', backref='user')
 
     def __init__(self, username, firstName, lastName, password):
         self.username = username

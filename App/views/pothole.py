@@ -7,5 +7,5 @@ from App.controllers import *
 
 @potholeViews.route('/api/potholes', methods=["GET"])
 def displayPotholes():
-    #displayData = getPotholeData()
-    return "Test"
+    displayData = getPotholeData()
+    return displayData

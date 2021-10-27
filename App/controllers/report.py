@@ -4,3 +4,8 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 import json
 
 from App.models import *
+
+def getReportData():
+    reports = db.session.query(Report).all()
+    reportData = [r.toDict() for r in reports]
+    return json.dumps(reportData)

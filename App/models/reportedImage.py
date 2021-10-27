@@ -1,19 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
-
+from .sharedDB import db
 
 class ReportedImage(db.Model):
     imageID = db.Column(db.Integer, primary_key = True)
-    #reportID
+    reportID = db.Column(db.Integer, db.ForeignKey("report.reportID"), nullable=False)
     imageURL = db.Column(db.String(200), nullable = False)
 
     def toDict(self):
         return {
+            "imageID" : self.imageID,
             "reportID" : self.reportID,
-            "userID" : self.userID,
-            "potholeID" : self.potholeID,
-            "dateReported" : self.dateReported,
-            "description" : self.description,
-            "reportedImages" : self.imageURL
+            "imageURL" : self.imageURL,
         }
