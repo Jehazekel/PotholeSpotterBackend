@@ -9,3 +9,8 @@ from App.controllers import *
 def displayPotholes():
     displayData = getPotholeData()
     return displayData
+
+@potholeViews.route('/api/potholes/<id>', methods=["GET"])
+def displayIndividualPotholes(id):
+    displayData = getIndividualPotholeData(id)
+    return displayData

@@ -1,6 +1,7 @@
 from flask_script import Manager
 from App.main import app
 import os
+from datetime import datetime, timedelta
 manager = Manager(app)
 
 from App.models import Pothole, User, Report, ReportedImage, db
@@ -19,7 +20,7 @@ def serve():
 
 @manager.command
 def demo():
-    pothole1 = Pothole(longitude=-61.277014, latitude=10.626571, constituencyID="arima")
+    pothole1 = Pothole(longitude=-61.277014, latitude=10.626571, constituencyID="arima", expiryDate=datetime.now() + timedelta(days=60))
     db.session.add(pothole1)
     db.session.commit()
     print("test potholes created")    

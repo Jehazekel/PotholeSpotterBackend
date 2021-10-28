@@ -6,8 +6,13 @@ from App.models import *
 from App.controllers import *
 
 @reportViews.route('/api/reports', methods=["GET"])
-def displayReport():
+def displayReports():
     displayData = getReportData()
+    return displayData
+
+@reportViews.route('/api/reports/pothole/<potholeID>', methods=["GET"])
+def displayPotholeReports(potholeID):
+    displayData = getPotholeReports(potholeID)
     return displayData
 
 @reportViews.route('/api/reports/standard', methods=["POST"])

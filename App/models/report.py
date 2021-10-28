@@ -17,7 +17,7 @@ class Report(db.Model):
             "reportID" : self.reportID,
             "userID" : self.userID,
             "potholeID" : self.potholeID,
-            "dateReported" : self.dateReported,
+            "dateReported" : self.dateReported.strftime("%Y-%m-%d"),
             "description" : self.description,
-            "reportedImages" : [rImage.toDict() for rImage in reportedImages]
+            #"reportedImages" : [rImage.toDict() for rImage in reportedImages]
         }
