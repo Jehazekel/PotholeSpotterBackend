@@ -66,6 +66,13 @@ def loginUserController(loginDetails):
 
     return {"error" : "Invalid login details provided!"}
 
+def getUserName(userID):
+    user = User.query.filter_by(userID=userID).first()
+    if user:
+        return {"firstName" : current_user.firstName, "lastName": current_user.lastName}
+    
+    return json.dumps({"error" : "User not found!"})
+
 def identifyUser(current_user):
     if current_user:
         return {"email" : current_user.email, "firstName" : current_user.firstName, "lastName": current_user.lastName}

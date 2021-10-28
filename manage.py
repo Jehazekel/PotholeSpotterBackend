@@ -19,12 +19,10 @@ def serve():
 
 @manager.command
 def demo():
-    user1 = User(username="tester1", firstName="John", lastName="Smith", password = "johnpass123")
-    user2 = User(username="tester2", firstName="Johnny", lastName="Steve", password="johnny123")
-    db.session.add(user1)
-    db.session.add(user2)
+    pothole1 = Pothole(longitude=-61.277014, latitude=10.626571, constituencyID="arima")
+    db.session.add(pothole1)
     db.session.commit()
-    print("test users created")    
+    print("test potholes created")    
 
 if __name__ == "__main__":
     manager.run()
