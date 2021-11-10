@@ -23,3 +23,7 @@ def loginUserView():
 def identify():
     outcomeMessage = identifyUser(current_user)
     return json.dumps(outcomeMessage)
+
+@userViews.route("/test", methods=["GET"])
+def test():
+    return json.dumps({"message": "website served"})
