@@ -2,18 +2,22 @@ from flask import Flask, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager, current_user
 from datetime import timedelta 
 from sqlalchemy.exc import IntegrityError, OperationalError
-import json
+import json, os
 
 from App.models import Pothole, User, Report, ReportedImage, db
 from App.views import *
 
 def loadConfig(app):
-    #try to load config from file, if fails then try to load from environment
+    app.config['ENV'] = os.environ.get('ENV', 'development')
     try:
         app.config.from_object('App.config.development')
-        #app.config['SQLALCHEMY_DATABASE_URI'] = get_db_uri() if app.config['SQLITEDB'] else app.config['DBURI']
     except:
         print("config file not present using environment variables")
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+        app.config['JWT_EXPIRATION_DELTA'] = os.environ.get('JWT_EXPIRATION_DELTA')
+        app.config['DEBUG'] = os.environ.get('DEBUG')
+        app.config['ENV'] = os.environ.get('ENV')
 
 def create_app():
     app = Flask(__name__)
