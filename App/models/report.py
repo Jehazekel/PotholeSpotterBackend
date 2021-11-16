@@ -7,9 +7,11 @@ class Report(db.Model):
     reportID = db.Column(db.Integer, primary_key = True)
     userID = db.Column(db.Integer, db.ForeignKey("user.userID"), nullable = False)
     potholeID = db.Column(db.Integer, db.ForeignKey("pothole.potholeID"), nullable=False)
-    description = db.Column(db.String(500), nullable = True)
+    description = db.Column(db.String(500), nullable = False)
     dateReported = db.Column(db.Date, nullable = False, default=datetime.utcnow)
-    reportedImages = db.relationship('ReportedImage', backref='report')
+    votes = db.relationship('UserReportVote', cascade="all, delete", backref='report')
+    reportedImages = db.relationship('ReportedImage', cascade="all, delete", backref='report')
+    
     
 
     def toDict(self):
@@ -19,5 +21,7 @@ class Report(db.Model):
             "potholeID" : self.potholeID,
             "dateReported" : self.dateReported.strftime("%Y-%m-%d"),
             "description" : self.description,
-            #"reportedImages" : [rImage.toDict() for rImage in reportedImages]
+            "votes" : [vote.toDict() for vote in self.votes],
+            "reportedImages" : [rImage.toDict() for rImage in self.reportedImages]
+            
         }

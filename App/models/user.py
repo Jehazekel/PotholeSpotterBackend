@@ -9,7 +9,8 @@ class User(db.Model):
     firstName = db.Column(db.String(64), nullable = False)
     lastName = db.Column(db.String(64), nullable = False)
     password = db.Column(db.String(256), nullable = False)
-    reports = db.relationship('Report', backref='user')
+    reports = db.relationship('Report', cascade="all, delete", backref='user')
+    votes = db.relationship('UserReportVote', cascade="all, delete", backref='voter')
 
     def __init__(self, email, firstName, lastName, password):
         self.email = email
