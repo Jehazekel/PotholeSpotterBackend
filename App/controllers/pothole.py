@@ -9,12 +9,12 @@ from App.models import *
 def getPotholeData():
     potholes = db.session.query(Pothole).all()
     potholeData = [p.toDict() for p in potholes]
-    return json.dumps(potholeData)
+    return json.dumps(potholeData), 200
 
 def getIndividualPotholeData(id):
     pothole = db.session.query(Pothole).filter_by(potholeID=id).first()
     if not pothole:
-        return {"error" : "No pothole data for that ID."}
+        return {"error" : "No pothole data for that ID."}, 404
 
     potholeData = pothole.toDict()
-    return json.dumps(potholeData)
+    return json.dumps(potholeData), 200

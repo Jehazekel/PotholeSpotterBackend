@@ -7,10 +7,10 @@ from App.controllers import *
 
 @potholeViews.route('/api/potholes', methods=["GET"])
 def displayPotholes():
-    displayData = getPotholeData()
-    return displayData
+    displayData, statusCode = getPotholeData()
+    return displayData, statusCode
 
 @potholeViews.route('/api/potholes/<id>', methods=["GET"])
 def displayIndividualPotholes(id):
-    displayData = getIndividualPotholeData(id)
-    return displayData
+    displayData, statusCode = getIndividualPotholeData(id)
+    return displayData, statusCode

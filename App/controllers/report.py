@@ -10,7 +10,7 @@ from App.models import *
 def getReportData():
     reports = db.session.query(Report).all()
     reportData = [r.toDict() for r in reports]
-    return json.dumps(reportData)
+    return json.dumps(reportData), 200
 
 def reportPotholeStandard(user, reportDetails):
     '''
@@ -52,7 +52,7 @@ def reportPotholeDriver(user, reportDetails):
                     finalPothole = newPothole
                 except:
                     db.session.rollback()
-                    return {"error": "Error adding pothole to database!"}
+                    return {"error": "Error adding pothole to database!"}, 500
             else:
                 alreadySubmitted = db.session.query(Report).filter_by(userID=user.userID, potholeID=finalPothole.potholeID).first()
                 if alreadySubmitted:
@@ -60,10 +60,10 @@ def reportPotholeDriver(user, reportDetails):
                         finalPothole.expiryDate = datetime.now() + timedelta(days=30)
                         db.session.add(finalPothole)
                         db.session.commit()
-                        return {"message" : "Expiry date of pothole has been reset!"}
+                        return {"message" : "Expiry date of pothole has been reset!"}, 201
                     except:
                         db.session.rollback()
-                        return {"error": "Unable to update expiry date!"}
+                        return {"error": "Unable to update expiry date!"}, 500
             try:
                 newReport = Report(userID = user.userID, potholeID=finalPothole.potholeID)
                 db.session.add(newReport)
@@ -75,21 +75,28 @@ def reportPotholeDriver(user, reportDetails):
                     db.session.commit()
                 except:
                     db.session.rollback()
-                    return {"error": "Unable to update expiry date!"}
+                    return {"error": "Unable to update expiry date!"}, 500
 
             except:
                 db.session.rollback()
-                return {"error": "Unable to add report to database!"}
+                return {"error": "Unable to add report to database!"}, 500
 
-            return {"message" : "Successfully added pothole report to database!"}
+            return {"message" : "Successfully added pothole report to database!"}, 201
 
         else:
-            return {"error" : "The coordinates are not in Trinidad and Tobago!"}
+            return {"error" : "The coordinates are not in Trinidad and Tobago!"}, 400
     else:
-        return {"error" : "Invalid report details submitted!"}
+        return {"error" : "Invalid report details submitted!"}, 400
 
 
 def getPotholeReports(potholeID):
     reports = db.session.query(Report).filter_by(potholeID=potholeID).all()
     reportData = [r.toDict() for r in reports]
-    return json.dumps(reportData)
+    return json.dumps(reportData), 200
+
+def getIndividualPotholeReport(potholeID, reportID):
+    report = db.session.query(Report).filter_by(potholeID=potholeID, reportID=reportID).first()
+    if(report):
+        return json.dumps(report.toDict()), 200
+    else:
+        return json.dumps({"error": "No report found."}), 404

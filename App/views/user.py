@@ -9,21 +9,21 @@ from App.controllers import *
 @userViews.route('/register', methods=["POST"])
 def registerUserView():
     regData = request.get_json()
-    outcomeMessage = registerUserController(regData)
-    return json.dumps(outcomeMessage)
+    outcomeMessage, statusCode = registerUserController(regData)
+    return json.dumps(outcomeMessage), statusCode
 
 @userViews.route('/login', methods=["POST"])
 def loginUserView():
     loginDetails = request.get_json()
-    outcomeMessage = loginUserController(loginDetails)
-    return json.dumps(outcomeMessage)
+    outcomeMessage, statusCode = loginUserController(loginDetails)
+    return json.dumps(outcomeMessage), statusCode
 
 @userViews.route("/identify", methods=["GET"])
 @jwt_required()
 def identify():
-    outcomeMessage = identifyUser(current_user)
-    return json.dumps(outcomeMessage)
+    outcomeMessage, statusCode = identifyUser(current_user)
+    return json.dumps(outcomeMessage), statusCode
 
 @userViews.route("/", methods=["GET"])
 def test():
-    return json.dumps({"message": "Website is deployed!"})
+    return json.dumps({"message": "Flask app is deployed!"}), 200
