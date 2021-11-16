@@ -18,3 +18,16 @@ def getIndividualPotholeData(id):
 
     potholeData = pothole.toDict()
     return json.dumps(potholeData), 200
+
+def deletePothole(potholeID):
+    pothole = db.session.query(Pothole).filter_by(potholeID=potholeID).first()
+    if not pothole:
+        return False
+    else:
+        try:
+            db.session.delete(pothole)
+            db.session.commit()
+            return True
+        except:
+            db.session.rollback()
+            return False

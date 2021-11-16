@@ -8,7 +8,7 @@ import json
 from App.models import *
 from App.controllers import *
 
-REPORT_DELETION_THRESHOLD = -1
+REPORT_DELETION_THRESHOLD = -5
 
 def getAllVotesForReport(reportID):
     votes = db.session.query(UserReportVote).all()
@@ -76,5 +76,4 @@ def voteOnPothole(user, potholeID, reportID, voteData):
 def calculateNetVotes(reportID):
     upvotes = db.session.query(UserReportVote).filter_by(reportID=reportID, upvote=True).count()
     downvotes = db.session.query(UserReportVote).filter_by(reportID=reportID, upvote=False).count()
-    print(upvotes-downvotes)
     return (upvotes-downvotes)

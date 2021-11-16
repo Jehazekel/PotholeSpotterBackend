@@ -7,6 +7,7 @@ import json
 import requests
 
 from App.models import *
+from App.controllers import *
 
 DISTANCE_THRESHOLD = 20 #Distance in Meters
 
@@ -173,6 +174,11 @@ def deletePotholeReport(potholeID, reportID):
             try:
                 db.session.delete(foundReport)
                 db.session.commit()
+
+                potholeReports = db.session.query(Report).filter_by(potholeID = potholeID).first()
+                if not potholeReports:
+                    deletePothole(potholeID)
+
                 return True
             except:
                 db.session.rollback()
@@ -188,6 +194,10 @@ def deleteUserPotholeReport(user, potholeID, reportID):
             try:
                 db.session.delete(foundReport)
                 db.session.commit()
+
+                potholeReports = db.session.query(Report).filter_by(potholeID = potholeID).first()
+                if not potholeReports:
+                    deletePothole(potholeID)
             except:
                 db.session.rollback()
                 return {"error" : "Unable to delete report."}, 400

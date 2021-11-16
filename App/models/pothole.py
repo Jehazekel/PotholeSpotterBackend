@@ -8,7 +8,7 @@ class Pothole(db.Model):
     latitude = db.Column(db.Float, nullable = False)
     constituencyID = db.Column(db.String(100), nullable = False)
     expiryDate = db.Column(db.Date, nullable = False)
-    reports = db.relationship('Report', cascade="all, delete", backref='pothole')
+    reports = db.relationship('Report', cascade="all, delete")
 
     def toDict(self):
         return {

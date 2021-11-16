@@ -12,7 +12,6 @@ class Report(db.Model):
     votes = db.relationship('UserReportVote', cascade="all, delete", backref='report')
     reportedImages = db.relationship('ReportedImage', cascade="all, delete", backref='report')
     
-    
 
     def toDict(self):
         return {
