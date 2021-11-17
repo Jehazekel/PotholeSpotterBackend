@@ -27,9 +27,13 @@ def displayIndividualPotholeReport(potholeID, reportID):
 '''PUT REQUEST NOT COMPLETE'''
 @reportViews.route('/api/reports/pothole/<potholeID>/report/<reportID>', methods=["PUT"])
 @jwt_required()
-def updatePotholeReport(potholeID, reportID):
-    outcomeMessage, statusCode = getIndividualPotholeReport(potholeID, reportID)
+def updatePotholeReportDescription(potholeID, reportID):
+    potholeDetails = request.get_json()
+    outcomeMessage, statusCode = updateReportDescription(current_user, potholeID, reportID, potholeDetails)
     return outcomeMessage, statusCode
+
+
+
 
 
 @reportViews.route('/api/reports/pothole/<potholeID>/report/<reportID>', methods=["DELETE"])

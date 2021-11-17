@@ -17,7 +17,6 @@ def getReportData():
     return json.dumps(reportData), 200
 
 
-#Fix
 def reportPotholeStandard(user, reportDetails):
     if "longitude" in reportDetails and "latitude" in reportDetails and "constituencyID" in reportDetails and "description" in reportDetails:
         if -61.965556 < reportDetails["longitude"] < -60.469077 and 10.028088 < reportDetails["latitude"] < 11.370345:
@@ -92,7 +91,6 @@ def reportPotholeStandard(user, reportDetails):
         return {"error" : "Invalid report details submitted!"}, 400
 
 def reportPotholeDriver(user, reportDetails):
-
     if "longitude" in reportDetails and "latitude" in reportDetails and "constituencyID" in reportDetails:
         if -61.965556 < reportDetails["longitude"] < -60.469077 and 10.028088 < reportDetails["latitude"] < 11.370345:
             print("Coordinates in Trinidad and Tobago")
@@ -199,7 +197,24 @@ def deleteUserPotholeReport(user, potholeID, reportID):
         return {"error" : "Invalid report details provided."}, 400
 
     
+def updateReportDescription(user, potholeID, reportID, potholeDetails):
 
+    if potholeDetails:
+        if "description" in potholeDetails:
+            report = db.session.query(Report).filter_by(userID=user.userID, reportID=reportID, potholeID=potholeID).first()
+            if report:
+                try:
+                    report.description = potholeDetails["description"]
+                    db.session.add(report)
+                    db.session.commit()
+                    return {"message" : "Pothole report description updated!"}, 201
+                except:
+                    db.session.rollback()
+                    return {"error": "Unable to update expiry date!"}, 500
+            else:
+                return {"error" : "Report does not exist!"}, 404
+    else:
+        return {"error" : "Invalid report details submitted!"}, 400
 
 
 def getPotholeReports(potholeID):
