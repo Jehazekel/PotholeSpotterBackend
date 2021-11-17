@@ -1,80 +1,120 @@
+#Justin Baldeosingh
+#SpotDPothole-Backend
+#NULLIFY
+
+#USER CONTROLLERS - Facilitate interactions between the user model and the other models/controllers of the application.
+
+#Imports flask modules and json.
 from flask import Flask, request, session
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager, current_user
 from sqlalchemy.exc import IntegrityError, OperationalError
 import json
 
+#Imports all of the models from the application.
 from App.models import *
 
+#Allows for a user object to be returned once they have been identified within the database.
 def identity(payload):
   return db.session.query(User).get(payload['identity'])
 
+#Determines whether the credentials for a user is correct and returns the user object associated with those credentials.
 def authenticate(email, password):
+    #Finds the user with the corresponding email.
     user = User.filter_by(email=email).first()
+    #If the user exists and the password is correct, the user is verified and the user object is returned.
     if user and user.checkPassword(password):
         return user
 
+#Facilitates the registration of a user in the application given a dictionary containing registration information.
+#The appropriate outcome and status codes are then returned.
 def registerUserController(regData):  
+    #If the registration data is not null, process the data.
     if regData:
-        if "email" in regData and "firstName" in regData and "lastName" in regData and "password" in regData and "confirmPassword" in regData:
+        #Ensures that all of the fields for registration are contained in the dictionary.
+        if "email" in regData and "firstName" in regData and "lastName" in regData and "password" in regData and "confirmPassword" in regData and "agreeToS" in regData:
+            #Parses the emails, first names and last names to ensure that there are no padded spaces.
             parsedEmail = regData["email"].replace(" ", "")
             parsedFirstName = regData["firstName"].replace(" ", "")
             parsedLastName = regData["lastName"].replace(" ", "")
 
+            #Ensures the user has agreed to the terms of service, and returns an appropriate error and status code if otherwise.
+            if regData["agreeToS"] != True:
+                return {"error" : "User did not agree to terms of service."}, 400
+
+            #Ensures the user has entered a valid email, and returns an appropriate error and status code if otherwise.
             if len(parsedEmail) < 3 or not "@" in parsedEmail or not "." in parsedEmail:
                 return {"error" : "Email is invalid!"}, 400
 
+            #Ensures the user has entered a valid first name, and returns an appropriate error and status code if otherwise.
             if len(parsedFirstName) < 2:
                 return {"error" : "First name is invalid!"}, 400
             
+            #Ensures the user has entered a valid last name, and returns an appropriate error and status code if otherwise.
             if len(parsedLastName) < 2:
                 return {"error": "Last name is invalid!"}, 400
 
+            #Ensures the user has entered a long enough password, and returns an appropriate error and status code if otherwise.
             if len(regData["password"]) < 6:
                 return {"error": "Password is too short"}, 400
             
+            #Ensures the user has entered matching passwords, and returns an appropriate error and status code if otherwise.
             if regData["password"] != regData["confirmPassword"]:
                 return {"error" : "Passwords do not match!"}, 400
 
+            #Attempts to register the user by adding them to the database.
             try:
+                #Creates a new user object using the parsed registration data.
                 newUser = User(parsedEmail, parsedFirstName, parsedLastName, regData["password"])
+                #Adds and commits the user to the database, and returns a success message and 'CREATED' http status code (201).
                 db.session.add(newUser)
                 db.session.commit()
                 return {"message" : "Sucesssfully registered!"}, 201
+            #If an integrity error exception is generated, there would already exist a user with the same email in the database.
             except IntegrityError:
+                #Rollback the database and return an error message and a 'CONFLICT' http status code (409)
                 db.session.rollback()
                 return {"error" : "User already exists!"}, 409
+            #If an operational error exception is generated, the database would not be initialized to handle the request.
             except OperationalError:
+                #Print a message to the application console and notify the user that there was an error via an error message response.
+                #Returns a "INTERNAL SERVER ERROR" http status code (500).
                 print("Database not initialized!")
                 return {"error" : "Database not initialized! Contact the administrator of the application!"}, 500
+            #Otherwise, return an error message stating that an unknown error has occured and a 'INTERNAL SERVER ERROR' http status code (500).
             except:
                 return {"error" : "An unknown error has occurred!"}, 500
-            
+
+    #If the registration data is null, return an error message along with a 'BAD REQUEST' http status code (400).        
     return {"error" : "Invalid registration details provided!"}, 400
 
-
+#Facilitates the login of a user in the application given a dictionary containing login information.
+#The appropriate outcome and status codes are then returned.
 def loginUserController(loginDetails):  
+    #If the login data is not null, process the data.
     if loginDetails:
+        #Ensures that all of the fields for login are contained in the dictionary.
         if "email" in loginDetails and "password" in loginDetails:
+            #Finds and stores the user account object for the associated email, within the database.
             userAccount = User.query.filter_by(email=loginDetails["email"]).first()
             
+            #If the account does not exist or the password is invalid, return an error stating that the wrong details were entered.
+            #Also return a "UNAUTHORIZED" http status code (401).
             if not userAccount or not userAccount.checkPassword(loginDetails["password"]):
                 return {"error" : "Wrong email or password entered!"}, 401
 
+            #If the login credentials are verified, create an access token for the user's session.
+            #The access token would then be returned along with an 'OK' http status code (200).
             if userAccount and userAccount.checkPassword(loginDetails["password"]):
                 access_token = create_access_token(identity = loginDetails["email"])
                 return {"access_token" : access_token}, 200
 
+    #If the login data is null, return an error message along with an 'UNAUTHORIZED' http status code (401).   
     return {"error" : "Invalid login details provided!"}, 401
 
-def getUserName(userID):
-    user = User.query.filter_by(userID=userID).first()
-    if user:
-        return {"firstName" : current_user.firstName, "lastName": current_user.lastName}
-    
-    return json.dumps({"error" : "User not found!"})
-
+#Returns the user's information given a user object.
 def identifyUser(current_user):
+    #If the user object is not null, return the details for the user object.
     if current_user:
         return {"email" : current_user.email, "firstName" : current_user.firstName, "lastName": current_user.lastName}, 200
-    
-    return json.dumps({"error" : "User is not logged in!"}), 401
+    #Otherwise, return an error message and an 'UNAUTHORIZED' http status code (401).
+    return {"error" : "User is not logged in!"}, 401

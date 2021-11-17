@@ -1,178 +1,259 @@
+#Justin Baldeosingh
+#SpotDPothole-Backend
+#NULLIFY
+
+#REPORT CONTROLLERS - Facilitate interactions between the report model and the other models/controllers of the application.
+
+#CONSTANTS
+#Specifies a distance threshold, in meters, that will be used to classify pothole reports to the same pothole, within this proximity.
+DISTANCE_THRESHOLD = 20
+#Specifies the number of days that should be added to the expiry date of a pothole, before they are deleted.
+EXPIRY_DATE_REFRESH = 30
+#Specifies the number of days that a pothole record should be initialized with, before they are deleted.
+EXPIRY_DATE_PRIMARY = 60
+
+#Imports flask modules, geopy, datetime and json.
 from flask import Flask, request, session
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager, current_user
-from sqlalchemy.exc import IntegrityError, OperationalError
 from geopy import distance
 from datetime import datetime, timedelta
 import json
-import requests
 
+#Imports the all of the models and controllers of the application.
 from App.models import *
 from App.controllers import *
 
-DISTANCE_THRESHOLD = 20 #Distance in Meters
 
+#Returns a json dump of all of the reports in the database.
 def getReportData():
+    #Gets all of the reports in the database, gets the dictionary definitions, and returns them all in an array.
+    #Also returns a 'OK' http status code (200)
     reports = db.session.query(Report).all()
     reportData = [r.toDict() for r in reports]
     return json.dumps(reportData), 200
 
+#Given the latitude and logitude for a report, finds the closest pothole within a threshold distance specified by DISTANCE_THRESHOLD
+def findClosestPothole(latitude, longitude):
+    #Initializes the finalPothole to None; there is no selected pothole that is close enough.
+    finalPothole = None
+    #Creates a tuple using the latitude and longitude reported.
+    newPotholeCoords = (latitude, longitude)
+    
+    #Sets the smallest distance to the nearest pothole to the distance threshold value.
+    smallestDistance = DISTANCE_THRESHOLD
 
+    #Gets all of the potholes in the database.
+    potholeQuery = db.session.query(Pothole).all()
+    #Iterates over all of the potholes in the database and calculates the distance between the pothole and the report location.
+    for pothole in potholeQuery:
+        centerPotholeCoords = (latitude, longitude)
+        distanceBetweenPotholes = distance.distance(centerPotholeCoords, newPotholeCoords) * 1000
+        
+        #If the distance between the current pothole is less than the smallest distance, set the finalPothole to match the current pothole.
+        #This effectively finds the nearest pothole, within the distance threshold, that the report can be matched to.
+        if distanceBetweenPotholes < smallestDistance:
+            finalPothole = pothole
+
+    #Returns the final pothole to be used for the report.
+    return finalPothole
+
+#Validates a report of a user via the standard interface before adding it to the database.
 def reportPotholeStandard(user, reportDetails):
+    #Initializes the finalPothole to be added to None.
+    finalPothole = None
+
+    #Determines if the reportDetails contains all of the neccesary fields for processing of the report.
     if "longitude" in reportDetails and "latitude" in reportDetails and "constituencyID" in reportDetails and "description" in reportDetails:
+        #If the coordinates reported are within the bounds for Trinidad and Tobago, process the report.
         if -61.965556 < reportDetails["longitude"] < -60.469077 and 10.028088 < reportDetails["latitude"] < 11.370345:
-            newPotholeCoords = (reportDetails["latitude"], reportDetails["longitude"])
-            finalPothole = None
+            #Finds the closest pothole to the coordinates.
+            finalPothole = findClosestPothole(reportDetails["latitude"], reportDetails["longitude"])
 
-            smallestDistance = DISTANCE_THRESHOLD
-
-            potholeQuery = db.session.query(Pothole).all()
-            for pothole in potholeQuery:
-                centerPotholeCoords = (pothole.toDict()["latitude"], pothole.toDict()["longitude"])
-                distanceBetweenPotholes = distance.distance(centerPotholeCoords, newPotholeCoords) * 1000
-                
-
-                if distanceBetweenPotholes < DISTANCE_THRESHOLD:
-                    if distanceBetweenPotholes < smallestDistance:
-                        finalPothole = pothole
-
+            #If there does not exist an existing pothole that the report can be mapped to, create a new pothole at the report location.
             if not finalPothole:
+                #Attempts to create a pothole record using the report details.
                 try:
-                    newPothole = Pothole(longitude=reportDetails["longitude"], latitude=reportDetails["latitude"], constituencyID=reportDetails["constituencyID"], expiryDate=datetime.now() + timedelta(days=60))
+                    #Creates the report using the report details, adds the report to the database, and commits the changes.
+                    newPothole = Pothole(longitude=reportDetails["longitude"], latitude=reportDetails["latitude"], constituencyID=reportDetails["constituencyID"], expiryDate=datetime.now() + timedelta(days=EXPIRY_DATE_PRIMARY))
                     db.session.add(newPothole)
                     db.session.commit()
+
+                    #Sets the selected finalPothole to this new pothole object.
                     finalPothole = newPothole
                 except:
+                #Otherwise, if a pothole cannot be created, rollback the database and return an error with 'INTERNAL SERVER ERROR' status code.
                     db.session.rollback()
                     return {"error": "Error adding pothole to database!"}, 500
+            #Otherwise, if there exists an existing pothole that the report can be mapped to, create a report for that location.
             else:
+                #Determines if a report has already been submitted by the user for this pothole.
                 alreadySubmitted = db.session.query(Report).filter_by(userID=user.userID, potholeID=finalPothole.potholeID).first()
+                #If a report has already been submitted, a resubmission will reset the expiry date of the pothole.
                 if alreadySubmitted:
+                    #Updates the expiry date of the pothole by adding a constant number of days to the expiry date.
                     try:
-                        finalPothole.expiryDate = datetime.now() + timedelta(days=30)
+                        #Updates expiry date, adds and commits changes to database. Returns a success message and a 'CREATED' http status code (201).
+                        finalPothole.expiryDate = datetime.now() + timedelta(days=EXPIRY_DATE_REFRESH)
                         db.session.add(finalPothole)
                         db.session.commit()
                         return {"message" : "Expiry date of pothole has been reset!"}, 201
                     except:
+                    #Otherwise, the pothole could not be updated. Rollback the database and return an error with a 'INTERNAL SERVER ERROR' https tatus code (500).
                         db.session.rollback()
                         return {"error": "Unable to update expiry date!"}, 500
+            #Attempts to create a report for the pothole.
             try:
+                #Creates a new report for the finalPothole using the description.
                 newReport = Report(userID = user.userID, potholeID=finalPothole.potholeID, description=reportDetails["description"])
+                #Adds and commits the new report to the database.
                 db.session.add(newReport)
                 db.session.commit()
 
+                #If there are images in the reportDetails, add the images to the report.
                 if "images" in reportDetails:
+                    #Iterates over the images within the images field of the reportDetails and adds them to the reportedImage database.
                     for imageURL in reportDetails["images"]:
+                        #Determines if the URL is valid and leads to an image.
                         if is_url_image(imageURL):
+                            #If valid, add the imageURL to the reportedImage database for the reportID.
                             try:
+                                #Creates image record using report details, adds to database, and commits changes.
                                 reportImage = ReportedImage(reportID=newReport.reportID, imageURL=imageURL)
                                 db.session.add(reportImage)
                                 db.session.commit()
                             except:
+                            #Otherwise, rollback the changes for the database and print an appropriate error.
                                 db.session.rollback()
                                 print("Unable to add this image to database.")
 
+                #Once a new report has been created for a pothole, update the expiry date for the pothole.
+                #Attempt to update the expiry date of the pothole.
                 try:
-                    finalPothole.expiryDate = datetime.now() + timedelta(days=30)
+                    #Update the expiry date of the pothole, add the pothole to the database, and commit the changes.
+                    finalPothole.expiryDate = datetime.now() + timedelta(days=EXPIRY_DATE_REFRESH)
                     db.session.add(finalPothole)
                     db.session.commit()
                 except:
+                #Otherwise, if an error has occurred, rollback the changes and return an error message and an "INTERNAL SERVER ERROR" http status code (500).
                     db.session.rollback()
                     return {"error": "Unable to update expiry date!"}, 500
-
+            #Otherwise, if a report cannto be created for the pothole, rollback the changes and return an error message and an "INTERNAL SERVER ERROR" http status code (500).
             except:
                 db.session.rollback()
                 return {"error": "Unable to add report to database! Ensure that all fields are filled out."}, 500
 
             return {"message" : "Successfully added pothole report to database!"}, 201
-
+        #Otherwise, the coordinates reported are outside of Trinidad and Tobago. Return an error and 'BAD REQUEST' http status code (400).
         else:
             return {"error" : "The coordinates are not in Trinidad and Tobago!"}, 400
+    #Otherwise, the request does not contain all of the required fields for processing. Return an error and 'BAD REQUEST' http status code (400).
     else:
         return {"error" : "Invalid report details submitted!"}, 400
 
+#Validates a report of a user via the driver interface before adding it to the database.
 def reportPotholeDriver(user, reportDetails):
+    #Initializes the finalPothole to be added to None.
+    finalPothole = None
+    
+    #Determines if the reportDetails contains all of the neccesary fields for processing of the report.
     if "longitude" in reportDetails and "latitude" in reportDetails and "constituencyID" in reportDetails:
+        #If the coordinates reported are within the bounds for Trinidad and Tobago, process the report.
         if -61.965556 < reportDetails["longitude"] < -60.469077 and 10.028088 < reportDetails["latitude"] < 11.370345:
-            print("Coordinates in Trinidad and Tobago")
-            newPotholeCoords = (reportDetails["latitude"], reportDetails["longitude"])
-            finalPothole = None
+            #Finds the closest pothole to the coordinates.
+            finalPothole = findClosestPothole(reportDetails["latitude"], reportDetails["longitude"])
 
-            smallestDistance = DISTANCE_THRESHOLD
-
-            potholeQuery = db.session.query(Pothole).all()
-            for pothole in potholeQuery:
-                centerPotholeCoords = (pothole.toDict()["latitude"], pothole.toDict()["longitude"])
-                distanceBetweenPotholes = distance.distance(centerPotholeCoords, newPotholeCoords) * 1000
-                
-
-                if distanceBetweenPotholes < DISTANCE_THRESHOLD:
-                    if distanceBetweenPotholes < smallestDistance:
-                        finalPothole = pothole
-
+            #If there does not exist an existing pothole that the report can be mapped to, create a new pothole at the report location.
             if not finalPothole:
+                #Attempts to create a pothole record using the report details.
                 try:
-                    newPothole = Pothole(longitude=reportDetails["longitude"], latitude=reportDetails["latitude"], constituencyID=reportDetails["constituencyID"], expiryDate=datetime.now() + timedelta(days=60))
+                    #Creates the report using the report details, adds the report to the database, and commits the changes.
+                    newPothole = Pothole(longitude=reportDetails["longitude"], latitude=reportDetails["latitude"], constituencyID=reportDetails["constituencyID"], expiryDate=datetime.now() + timedelta(days=EXPIRY_DATE_PRIMARY))
                     db.session.add(newPothole)
                     db.session.commit()
+                    #Sets the selected finalPothole to this new pothole object.
                     finalPothole = newPothole
+                #Otherwise, if a pothole cannot be created, rollback the database and return an error with 'INTERNAL SERVER ERROR' status code.
                 except:
                     db.session.rollback()
                     return {"error": "Error adding pothole to database!"}, 500
+            #Otherwise, if there exists an existing pothole that the report can be mapped to, create a report for that location.
             else:
+                #Determines if a report has already been submitted by the user for this pothole.
                 alreadySubmitted = db.session.query(Report).filter_by(userID=user.userID, potholeID=finalPothole.potholeID).first()
+                #If a report has already been submitted, a resubmission will reset the expiry date of the pothole.
                 if alreadySubmitted:
+                    #Updates the expiry date of the pothole by adding a constant number of days to the expiry date.
                     try:
-                        finalPothole.expiryDate = datetime.now() + timedelta(days=30)
+                        #Updates expiry date, adds and commits changes to database. Returns a success message and a 'CREATED' http status code (201).
+                        finalPothole.expiryDate = datetime.now() + timedelta(days=EXPIRY_DATE_REFRESH)
                         db.session.add(finalPothole)
                         db.session.commit()
                         return {"message" : "Expiry date of pothole has been reset!"}, 201
                     except:
+                    #Otherwise, the pothole could not be updated. Rollback the database and return an error with a 'INTERNAL SERVER ERROR' https tatus code (500).
                         db.session.rollback()
                         return {"error": "Unable to update expiry date!"}, 500
+            #Attempts to create a report for the pothole.
             try:
+                #Creates a new report for the finalPothole using the description.
                 newReport = Report(userID = user.userID, potholeID=finalPothole.potholeID, description="Pothole submitted via Driver Mode.")
                 db.session.add(newReport)
                 db.session.commit()
 
+                #Update the expiry date of the pothole, add the pothole to the database, and commit the changes.
                 try:
                     finalPothole.expiryDate = datetime.now() + timedelta(days=30)
                     db.session.add(finalPothole)
                     db.session.commit()
+                 #Otherwise, if an error has occurred, rollback the changes and return an error message and an "INTERNAL SERVER ERROR" http status code (500).
                 except:
                     db.session.rollback()
                     return {"error": "Unable to update expiry date!"}, 500
-
+            #Otherwise, if a report cannot be created, rollback the database and return an error and a 'INTERNAL SERVER ERROR' http status code (500).
             except:
                 db.session.rollback()
                 return {"error": "Unable to add report to database!"}, 500
 
+            #Once the report and expiry dates have been succesfully added and updated, return a success message and a 'CREATED' http status code (201)
             return {"message" : "Successfully added pothole report to database!"}, 201
 
+        #Otherwise, the coordinates reported are outside of Trinidad and Tobago. Return an error and 'BAD REQUEST' http status code (400).
         else:
             return {"error" : "The coordinates are not in Trinidad and Tobago!"}, 400
+    #Otherwise, the request does not contain all of the required fields for processing. Return an error and 'BAD REQUEST' http status code (400).
     else:
         return {"error" : "Invalid report details submitted!"}, 400
 
+
+#SYSTEM POTHOLE REPORT DELETE FUNCTION
+#Allows the system to delete a pothhole given the reportID and potholeID.
 def deletePotholeReport(potholeID, reportID):
-        print("Found")
-        foundReport = db.session.query(Report).filter_by(potholeID= potholeID, reportID=reportID).first()
+    #Finds and stores the report to be deleted using the potholeID and reportID.
+    foundReport = db.session.query(Report).filter_by(potholeID= potholeID, reportID=reportID).first()
 
-        if foundReport:
-            
-            try:
-                db.session.delete(foundReport)
-                db.session.commit()
+    #If the report is found, delete the report.
+    if foundReport:
+        #Attempts to delete the report.
+        try:
+            #Deletes the report and commits the change to the database.
+            db.session.delete(foundReport)
+            db.session.commit()
 
-                potholeReports = db.session.query(Report).filter_by(potholeID = potholeID).first()
-                if not potholeReports:
-                    deletePothole(potholeID)
+            #Determines if there are any reports for a pothole given the potholeID.
+            potholeReports = db.session.query(Report).filter_by(potholeID = potholeID).first()
+            #If there is no report found, the pothole has no more reports and can therefore be deleted.
+            if not potholeReports:
+                deletePothole(potholeID)
 
-                return True
-            except:
-                db.session.rollback()
-                return False
-        else:
+            #Returns true since the report was deleted.
+            return True
+        #If the deletion fails, rollback the database and return false since there was no deletion.
+        except:
+            db.session.rollback()
             return False
+    #If the report is not found, return false since there was no deletion.
+    else:
+        return False
 
 def deleteUserPotholeReport(user, potholeID, reportID):
     if potholeID and reportID:
@@ -198,7 +279,6 @@ def deleteUserPotholeReport(user, potholeID, reportID):
 
     
 def updateReportDescription(user, potholeID, reportID, potholeDetails):
-
     if potholeDetails:
         if "description" in potholeDetails:
             report = db.session.query(Report).filter_by(userID=user.userID, reportID=reportID, potholeID=potholeID).first()
