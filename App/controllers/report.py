@@ -16,17 +16,6 @@ def getReportData():
     reportData = [r.toDict() for r in reports]
     return json.dumps(reportData), 200
 
-#StackOverflow https://stackoverflow.com/questions/10543940/check-if-a-url-to-an-image-is-up-and-exists-in-python
-def is_url_image(image_url):
-    image_formats = ("image/png", "image/jpeg", "image/jpg")
-    try:
-        r = requests.get(image_url)
-    except:
-        return False
-    if r.headers["content-type"] in image_formats:
-        return True
-    return False
-
 
 #Fix
 def reportPotholeStandard(user, reportDetails):
@@ -72,15 +61,16 @@ def reportPotholeStandard(user, reportDetails):
                 db.session.add(newReport)
                 db.session.commit()
 
-                for imageURL in reportDetails["images"]:
-                    if is_url_image(imageURL):
-                        try:
-                            reportImage = ReportedImage(reportID=newReport.reportID, imageURL=imageURL)
-                            db.session.add(reportImage)
-                            db.session.commit()
-                        except:
-                            db.session.rollback()
-                            print("Unable to add this image to database.")
+                if "images" in reportDetails:
+                    for imageURL in reportDetails["images"]:
+                        if is_url_image(imageURL):
+                            try:
+                                reportImage = ReportedImage(reportID=newReport.reportID, imageURL=imageURL)
+                                db.session.add(reportImage)
+                                db.session.commit()
+                            except:
+                                db.session.rollback()
+                                print("Unable to add this image to database.")
 
                 try:
                     finalPothole.expiryDate = datetime.now() + timedelta(days=30)
@@ -92,7 +82,7 @@ def reportPotholeStandard(user, reportDetails):
 
             except:
                 db.session.rollback()
-                return {"error": "Unable to add report to database! Ensure that there is a description."}, 500
+                return {"error": "Unable to add report to database! Ensure that all fields are filled out."}, 500
 
             return {"message" : "Successfully added pothole report to database!"}, 201
 

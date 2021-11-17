@@ -66,7 +66,7 @@ def voteOnPothole(user, potholeID, reportID, voteData):
 
                         return {"message": "Vote updated for report!"}, 200
             except :
-                db.session.rollback();
+                db.session.rollback()
                 return {"error": "Error voting for this report!"}, 500
         else:
             return {"error": "Invalid vote data supplied!"}, 400
