@@ -8,6 +8,10 @@ from flask_migrate import Migrate, MigrateCommand
 import os
 from datetime import datetime, timedelta
 
+#Import models and controllers
+from App.models import *
+from App.controllers import *
+
 #Imports the main application object and initializes the manager for the application and the database migrator.
 from App.main import app
 manager = Manager(app)
@@ -15,10 +19,6 @@ migrate = Migrate(app, db)
 
 #Sets the migration command for migrating the database.
 manager.add_command('db', MigrateCommand)
-
-#Import models and controllers
-from App.models import *
-from App.controllers import *
 
 #Initializes the database via the 'python3 manage.py initDB' command.
 #Creates the database for the application and prints a message once the initialization is complete.

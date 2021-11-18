@@ -23,3 +23,10 @@ def voteOnReport(potholeID, reportID):
     outcomeMessage, statusCode = voteOnPothole(current_user, potholeID, reportID, voteData)
     return json.dumps(outcomeMessage), statusCode
 
+#Creates a GET route to retrieve all the votes for a report. Also returns a status code to denote the outcome of the operation.
+@userReportVoteViews.route('/api/vote/pothole/<potholeID>/report/<reportID>', methods=["GET"])
+def getPotholeVotes(potholeID, reportID):
+    voteData = request.get_json()
+    displayData, statusCode = getAllVotesForReport(reportID)
+    return displayData, statusCode
+
