@@ -45,7 +45,7 @@ app.register_blueprint(potholeViews)
 app.register_blueprint(userViews)
 app.register_blueprint(reportedImageViews)
 app.register_blueprint(reportViews)
-app.register_blueprint(userReportViews)
+app.register_blueprint(userReportVoteViews)
 
 
 # Flask Boilerplate for loading a user's context.

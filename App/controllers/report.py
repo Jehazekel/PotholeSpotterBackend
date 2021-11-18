@@ -344,15 +344,23 @@ def updateReportDescription(user, potholeID, reportID, potholeDetails):
         return {"error" : "Invalid report update request submitted!"}, 400
 
 
+#Returns an json dump of the array of all the reports associated with a potholeID.
 def getPotholeReports(potholeID):
+    #Gets all of the reports associated with a potholeID.
     reports = db.session.query(Report).filter_by(potholeID=potholeID).all()
+    #Converts all of the found reports to their dictionary definition, and stores them in an array.
     reportData = [r.toDict() for r in reports]
+    #Returns all of the reports in an array in json form, and an 'OK' http status codee (200).
     return json.dumps(reportData), 200
 
+#Returns an individual pothole information given the potholeID and reportID.
 def getIndividualPotholeReport(potholeID, reportID):
+    #Gets the report associated with the potholeID and reportID.
     report = db.session.query(Report).filter_by(potholeID=potholeID, reportID=reportID).first()
+    #If a report is found, return a json dump of the definition of the report and a 'OK' http status code (200).
     if(report):
         return json.dumps(report.toDict()), 200
+    #Otherwise, if a report is not found, return an error and a 'NOT FOUND' http status code (404).
     else:
         return json.dumps({"error": "No report found."}), 404
 
