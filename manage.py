@@ -4,12 +4,17 @@
 
 #Import Modules
 from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
 import os
 from datetime import datetime, timedelta
 
-#Imports the main application object and initializes the manager for the application.
+#Imports the main application object and initializes the manager for the application and the database migrator.
 from App.main import app
 manager = Manager(app)
+migrate = Migrate(app, db)
+
+#Sets the migration command for migrating the database.
+manager.add_command('db', MigrateCommand)
 
 #Import models and controllers
 from App.models import *
