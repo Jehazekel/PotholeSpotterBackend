@@ -46,7 +46,7 @@ $ py manage.py |task|
 Please note that custom tasks can also be created by using the '@manager.command' as follows:
 ```
 @manager.command
-def customTask():
+def task():
     print("Testing Task")
 ```
 
@@ -69,7 +69,7 @@ $ py manage.py initDB
 or
 $ npm run initDB
 ```
-* Note that if the 'SQLITEDB' configuration variable is set to true, a sqlite database 'spotdpothole.db' will be created.
+* Note that if the 'SQLITEDB' configuration variable is set to true, a sqlite database 'spotDPothole.db' will be created.
 
 ## DATABASE MIGRATIONS
 If the database is modified, it must be migrated to the conform with the new configuration. The following commands facilitate the migration of the database:
