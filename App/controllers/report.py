@@ -17,12 +17,29 @@ from flask import Flask, request, session
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager, current_user
 from geopy import distance
 from datetime import datetime, timedelta
-import json
+import json, requests
 
 #Imports the all of the models and controllers of the application.
 from App.models import *
 from App.controllers import *
 
+#Referenced from StackOverflow
+#https://stackoverflow.com/questions/10543940/check-if-a-url-to-an-image-is-up-and-exists-in-python
+#Given a URL, determines if the URL points to an image.
+def is_url_image(image_url):
+    #Sets the expected image types.
+    image_formats = ("image/png", "image/jpeg", "image/jpg")
+    #Attempts to send a GET request to the URL.
+    try:
+        r = requests.get(image_url)
+    #If the request fails, the URL would be invalid; return false.
+    except:
+        return False
+    #If the content-type in the headers of the response contains a matching image format, return true.
+    if r.headers["content-type"] in image_formats:
+        return True
+    #Otherwise, return false.
+    return False
 
 #Returns a json dump of all of the reports in the database.
 def getReportData():
@@ -113,8 +130,12 @@ def reportPotholeStandard(user, reportDetails):
                 if "images" in reportDetails:
                     #Iterates over the images within the images field of the reportDetails and adds them to the reportedImage database.
                     for imageURL in reportDetails["images"]:
+                        
                         #Determines if the URL is valid and leads to an image.
                         if is_url_image(imageURL):
+                            #^^^FIX
+
+                            print(imageURL)
                             #If valid, add the imageURL to the reportedImage database for the reportID.
                             try:
                                 #Creates image record using report details, adds to database, and commits changes.
@@ -255,46 +276,72 @@ def deletePotholeReport(potholeID, reportID):
     else:
         return False
 
+#USER POTHOLE REPORT DELETE FUNCTION
+#Facilitates the creator of a report to be able to delete their own report.
 def deleteUserPotholeReport(user, potholeID, reportID):
+    #Ensures that the potholeID and reportID are non-null before deleting the data.
     if potholeID and reportID:
+        #Finds the report, reported by the user, that corresponds to the potholeID and reportID.
         foundReport = db.session.query(Report).filter_by(potholeID=potholeID, reportID=reportID, userID=user.userID).first()
 
+        #If a report is found, delete the report.
         if foundReport:
+            #Attempts to delete the found report and commit to database.
             try:
                 db.session.delete(foundReport)
                 db.session.commit()
 
+                #Determines if there are any more reports for the pothole after the deletion.
                 potholeReports = db.session.query(Report).filter_by(potholeID = potholeID).first()
+                #If there are no more reports for that pothole, the pothole can be deleted.
                 if not potholeReports:
+                    #Deletes the pothole with the specified ID.
                     deletePothole(potholeID)
+                
+                #After deleting the reports/pothole, return a success message and a 'OK' http status code (200).
+                return {"message" : "Successfully deleted report."}, 200
+            #If deleting the report fails, rollback the database, and return an error and 'INTERNAL SERVER ERROR' http status code (500).
             except:
                 db.session.rollback()
-                return {"error" : "Unable to delete report."}, 400
-            
-            return {"error" : "Successfully deleted report."}, 200
+                return {"error" : "Unable to delete report."}, 500
+        #Otherwise, if a report was not found, return an error and a 'NOT FOUND' http status code (404).
         else:
             return {"error" : "Report does not exist! Unable to delete."}, 404
+    #Otherwise, if the potholeID or the reportID are null, an invalid request was submitted. Return an error message and a 'BAD REQUEST' http status request (400).
     else:
         return {"error" : "Invalid report details provided."}, 400
 
-    
+#Facilitates the creator of a report to update the description of their report.    
 def updateReportDescription(user, potholeID, reportID, potholeDetails):
+    #Determines if the potholeDetails is not null before processing the data.
     if potholeDetails:
+        #If the potholeDetails contains a "description" key field, process the data.
         if "description" in potholeDetails:
+            #Finds the report, made by the creator, that is specified by the potholeID and reportID.
             report = db.session.query(Report).filter_by(userID=user.userID, reportID=reportID, potholeID=potholeID).first()
+            #If a report is found, update the description.
             if report:
+                #Attempts to update the description of the found report, add the report to the database, and commit the changes.
+                #Also returns a message and a 'OK' http status code (200).
                 try:
                     report.description = potholeDetails["description"]
                     db.session.add(report)
                     db.session.commit()
-                    return {"message" : "Pothole report description updated!"}, 201
+                    return {"message" : "Pothole report description updated!"}, 200
+                #If the report cannot be updated, rollback the database, and return an error and 'INTERNAL SERVER ERROR' http status code (500).
                 except:
                     db.session.rollback()
                     return {"error": "Unable to update expiry date!"}, 500
+            #Otherwise, if a report is not found, return an error and a 'NOT FOUND' http status code.
             else:
                 return {"error" : "Report does not exist!"}, 404
+        #Otherwise, potholeDetails does not contain a description and cannot be used to update the description.
+        #Return an error and 'BAD REQUEST' http status code (400).
+        else:
+            return {"error" : "Invalid report details submitted!"}, 400
+    #Otherwise, reportDetails is null and cannot be processed. Return an error and 'BAD REQUEST' status code.
     else:
-        return {"error" : "Invalid report details submitted!"}, 400
+        return {"error" : "Invalid report update request submitted!"}, 400
 
 
 def getPotholeReports(potholeID):
@@ -308,3 +355,5 @@ def getIndividualPotholeReport(potholeID, reportID):
         return json.dumps(report.toDict()), 200
     else:
         return json.dumps({"error": "No report found."}), 404
+
+

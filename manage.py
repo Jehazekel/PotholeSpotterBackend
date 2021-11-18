@@ -23,11 +23,18 @@ def initDB():
     db.session.commit()
     print('Database Initialized!')
 
+#Defines code that should be run at startup of the server.
+def bootstrapServer():
+    #Deletes expired potholes.
+    deleteExpiredPotholes()
+
 #Allows the flask application to be served via the 'python3 manage.py serve' command.
 #Prints the mode in which the application is running, and also serves the application.
 @manager.command
 def serve():
     print('Application running in ' + app.config['ENV'] + ' mode!')
+    #Carries out startup tasks for application server.
+    bootstrapServer()
     app.run(host='0.0.0.0', port = 8080, debug = app.config['ENV'] == 'development')
 
 
@@ -43,3 +50,4 @@ def test():
 #If the application is run via 'manage.py', facilitate manager arguments.
 if __name__ == "__main__":
     manager.run()
+

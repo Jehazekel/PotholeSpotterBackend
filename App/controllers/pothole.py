@@ -53,3 +53,11 @@ def deletePothole(potholeID):
         #If the deletion operation fails, rollback the database and return False that the pothole could not be deleted.
             db.session.rollback()
             return False
+
+#Deletes all of the potholes that have expired.
+def deleteExpiredPotholes():
+    #Gets all of the expired potholes, that is, gets all of the potholes where the expiry date has passed.
+    expiredPotholes = db.session.query(Pothole).filter(datetime.now() >= Pothole.expiryDate).all()
+    #Iterates over all of the expired potholes and deletes them.
+    for pothole in expiredPotholes:
+        deletePothole(pothole.potholeID)

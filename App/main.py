@@ -48,8 +48,6 @@ app.register_blueprint(reportViews)
 app.register_blueprint(userReportViews)
 
 
-
-
 # Flask Boilerplate for loading a user's context.
 # Register a callback function that loades a user from your database whenever
 # a protected route is accessed. This should return any python object on a
