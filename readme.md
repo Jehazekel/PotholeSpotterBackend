@@ -74,9 +74,9 @@ $ npm run initDB
 ## DATABASE MIGRATIONS
 If the database is modified, it must be migrated to the conform with the new configuration. The following commands facilitate the migration of the database:
 ```
-$ python3 manage.py db init
-$ python3 manage.py db migrate
-$ python3 manage.py db upgrade
+$ py manage.py db init
+$ py manage.py db migrate
+$ py manage.py db upgrade
 ```
 
 ## PROJECT DELIVERABLES
