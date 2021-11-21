@@ -2,3 +2,6 @@
 from .controllers import *
 from .models import *
 from .views import *
+
+#Imports the tests
+from .tests import *

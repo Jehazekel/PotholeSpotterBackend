@@ -13,18 +13,6 @@ import json
 #Imports all of the models from the application.
 from App.models import *
 
-#Allows for a user object to be returned once they have been identified within the database.
-def identity(payload):
-  return db.session.query(User).get(payload['identity'])
-
-#Determines whether the credentials for a user is correct and returns the user object associated with those credentials.
-def authenticate(email, password):
-    #Finds the user with the corresponding email.
-    user = User.filter_by(email=email).first()
-    #If the user exists and the password is correct, the user is verified and the user object is returned.
-    if user and user.checkPassword(password):
-        return user
-
 #Facilitates the registration of a user in the application given a dictionary containing registration information.
 #The appropriate outcome and status codes are then returned.
 def registerUserController(regData):  
@@ -118,3 +106,54 @@ def identifyUser(current_user):
         return {"email" : current_user.email, "firstName" : current_user.firstName, "lastName": current_user.lastName}, 200
     #Otherwise, return an error message and an 'UNAUTHORIZED' http status code (401).
     return {"error" : "User is not logged in!"}, 401
+
+##################### TEST CONTROLLERS #####################
+def createTestUsers():
+    registerUserController({
+        "email" : "tester1@yahoo.com",
+        "firstName" : "Moses",
+        "lastName" : "Darren",
+        "password" : "121233",
+        "confirmPassword" : "121233",
+        "agreeToS": True
+    })
+    registerUserController({
+        "email" : "tester2@yahoo.com",
+        "firstName" : "Jose",
+        "lastName" : "Kerron",
+        "password" : "121233",
+        "confirmPassword" : "121233",
+        "agreeToS": True
+    })
+    registerUserController({
+        "email" : "tester3@yahoo.com",
+        "firstName" : "Mary",
+        "lastName" : "Hamilton",
+        "password" : "121233",
+        "confirmPassword" : "121233",
+        "agreeToS": True
+    })
+    registerUserController({
+        "email" : "tester4@yahoo.com",
+        "firstName" : "Keisha",
+        "lastName" : "Dan",
+        "password" : "121233",
+        "confirmPassword" : "121233",
+        "agreeToS": True
+    })
+    registerUserController({
+        "email" : "tester5@yahoo.com",
+        "firstName" : "Harry",
+        "lastName" : "Potter",
+        "password" : "121233",
+        "confirmPassword" : "121233",
+        "agreeToS": True
+    })
+
+def getAllRegisteredUsers():
+    allUsers = User.query.all()
+    return json.dumps([u.toDict() for u in allUsers])
+
+def getOneRegisteredUser(email):
+    testUser = db.session.query(User).filter_by(email=email).first()
+    return testUser

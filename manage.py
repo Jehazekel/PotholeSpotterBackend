@@ -12,8 +12,14 @@ from datetime import datetime, timedelta
 from App.models import *
 from App.controllers import *
 
-#Imports the main application object and initializes the manager for the application and the database migrator.
-from App.main import app
+#Imports the main application object 
+from App.main import *
+
+#Creates app and initializes database
+app = create_app()
+init_db(app)
+
+#Initializes the manager for the application and the database migrator.
 manager = Manager(app)
 migrate = Migrate(app, db)
 
@@ -25,7 +31,6 @@ manager.add_command('db', MigrateCommand)
 @manager.command
 def initDB():
     db.create_all(app=app)
-    db.session.commit()
     print('Database Initialized!')
 
 #Defines code that should be run at startup of the server.
@@ -42,15 +47,6 @@ def serve():
     bootstrapServer()
     app.run(host='0.0.0.0', port = 8080, debug = app.config['ENV'] == 'development')
 
-
-#Allows for the creation of test data via the use of the 'python3 manage.py test' command.
-#Modified as needed to test different constructors, interactions, and test cases.
-@manager.command
-def test():
-    pothole1 = Pothole(longitude=-61.277014, latitude=10.626571, constituencyID="arima", expiryDate=datetime.now() + timedelta(days=60))
-    db.session.add(pothole1)
-    db.session.commit()
-    print("test potholes created")    
 
 #If the application is run via 'manage.py', facilitate manager arguments.
 if __name__ == "__main__":

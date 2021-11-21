@@ -5,13 +5,12 @@
 #REPORTEDIMAGE VIEW - Defines the view endpoints for REPORTEDIMAGES.
 
 #Imports flask modules.
-from flask import Blueprint, redirect, request, jsonify, send_from_directory
+from flask import Blueprint, request, jsonify, send_from_directory
 
 #Creates a blueprint to the collection of views for users.
 userViews = Blueprint('userViews', __name__)
 
-#Imports the all of the models and controllers of the application.
-from App.models import *
+#Imports the all of the controllers of the application.
 from App.controllers import *
 
 #Creates a POST route to facilitate the registration of a new user. Also returns a status code to denote the outcome of the operation.
