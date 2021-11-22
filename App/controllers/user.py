@@ -70,7 +70,10 @@ def registerUserController(regData):
                 return {"error" : "Database not initialized! Contact the administrator of the application!"}, 500
             #Otherwise, return an error message stating that an unknown error has occured and a 'INTERNAL SERVER ERROR' http status code (500).
             except:
+                #Rollback the database
+                db.session.rollback()
                 return {"error" : "An unknown error has occurred!"}, 500
+                
 
     #If the registration data is null, return an error message along with a 'BAD REQUEST' http status code (400).        
     return {"error" : "Invalid registration details provided!"}, 400
@@ -157,3 +160,11 @@ def getAllRegisteredUsers():
 def getOneRegisteredUser(email):
     testUser = db.session.query(User).filter_by(email=email).first()
     return testUser
+
+def fixtureBugFix():
+    try:
+        newUser = User("bugfix@yahoo.com", "parsedFirstName", "parsedLastName", "password")
+        db.session.add(newUser)
+        db.session.commit()
+    except:
+        db.session.rollback()
