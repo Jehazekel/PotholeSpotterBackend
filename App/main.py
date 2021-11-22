@@ -44,6 +44,7 @@ def loadConfig(app, config):
 def init_db(app):
     db.init_app(app)
     db.create_all(app=app)
+    db.session.commit()
 
 #Creates the application, loads the configuration, adds the views, initializes the database, creates the JWT manager, and returns the application context.
 def create_app(config={}):

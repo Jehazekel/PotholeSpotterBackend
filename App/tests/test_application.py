@@ -14,7 +14,6 @@ LOGGER = logging.getLogger(__name__)
 def empty_db():
     app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///test.db'})
     init_db(app)
-    fixtureBugFix()
     yield app.test_client()
     os.unlink(os.getcwd()+'/App/test.db')
     
@@ -24,7 +23,6 @@ def empty_db():
 def users_in_db():
     app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///test.db'})
     init_db(app)
-    fixtureBugFix()
     createTestUsers()
     yield app.test_client()
     os.unlink(os.getcwd()+'/App/test.db')
@@ -96,7 +94,6 @@ def testLoginInvalidData(users_in_db):
 
 
 ########## Integration Tests ##########  
-'''
 #Integration Test 1: registerUserController should create a user account using valid data.
 def testRegister(empty_db):
     registerUserController({'firstName' : 'Danny', 'lastName' : 'Phantom', 'email' : 'DansPhantom@gmail.com', 'password' : 'danny123', 'confirmPassword' : 'danny123', 'agreeToS' : True})
@@ -118,9 +115,6 @@ def testRegisterExistingUser(empty_db):
     r = registerUserController({'firstName' : 'Danny', 'lastName' : 'Phantom', 'email' : 'DansPhantom1@gmail.com', 'password' : 'danny123', 'confirmPassword' : 'danny123', 'agreeToS' : True})
     assert "User already exists!" in r[0]["error"]
 
-def test_LOAD_USERDB2(users_in_db):
-    assert True
-    
 # Integration Test 4:
 def testAddNewPotholeDriver(users_in_db):
     reportDetails = {
@@ -132,7 +126,7 @@ def testAddNewPotholeDriver(users_in_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     r = reportPotholeDriver(user1, reportDetails)
     assert "message" in r[0] and r[1] == 201
-'''
+
 '''
 # This is an integration test because it has side effects in the database
 # Test 5: create_user controller should create a user record with the values given to it

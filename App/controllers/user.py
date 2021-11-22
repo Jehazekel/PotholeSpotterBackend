@@ -160,11 +160,3 @@ def getAllRegisteredUsers():
 def getOneRegisteredUser(email):
     testUser = db.session.query(User).filter_by(email=email).first()
     return testUser
-
-def fixtureBugFix():
-    try:
-        newUser = User("bugfix@yahoo.com", "parsedFirstName", "parsedLastName", "password")
-        db.session.add(newUser)
-        db.session.commit()
-    except:
-        db.session.rollback()
