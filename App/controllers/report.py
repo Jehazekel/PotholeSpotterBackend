@@ -133,7 +133,6 @@ def reportPotholeStandard(user, reportDetails):
                         
                         #Determines if the URL is valid and leads to an image.
                         if is_url_image(imageURL):
-                            #^^^FIX
 
                             print(imageURL)
                             #If valid, add the imageURL to the reportedImage database for the reportID.

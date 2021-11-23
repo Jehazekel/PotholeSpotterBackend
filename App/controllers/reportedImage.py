@@ -57,7 +57,7 @@ def getIndividualPotholeReportImage(reportID, imageID):
             return {"error" : "Pothole image not found!"}, 404
 
         #Otherwise, return the information for the found reported image, and 'OK' http status code.
-        return foundReportedImage.toDict(), 200
+        return json.dumps(foundReportedImage.toDict()), 200
     #If either of the reportID or imageID are null, return an error and 'BAD REQUEST' http status code.
     else:
         return {"error" : "Invalid pothole image requested!"}, 400
@@ -131,10 +131,12 @@ def addPotholeReportImage(user, potholeID, reportID, imageDetails):
                         invalidCount += 1
                         db.session.rollback()
                         print("Pothole image could not be added.")
+                else:
+                    invalidCount += 1
             
             #If the invalid count is greater than 0, return the outcome along with a 'PARTIAL CONTENT' http status code (206).
             if invalidCount > 0:
-                return {"message" : "One or more images were not succesfully added."}, 206
+                return {"error" : "One or more images were not succesfully added."}, 206
             #Otherwise, return a success message and a 'CREATED' http status code (201).
             else:
                 return {"message" : "All images successfully added."}, 201
