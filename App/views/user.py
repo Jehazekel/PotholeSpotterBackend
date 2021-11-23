@@ -34,3 +34,7 @@ def loginUserView():
 def identify():
     outcomeMessage, statusCode = identifyUser(current_user)
     return json.dumps(outcomeMessage), statusCode
+
+@userViews.route("/test", methods=["GET"])
+def testRoute():
+    return json.dumps("Test"), 200
