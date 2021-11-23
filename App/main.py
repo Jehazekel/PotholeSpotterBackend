@@ -53,6 +53,7 @@ def create_app(config={}):
     db.init_app(app)
     app.app_context().push()
     jwt.init_app(app)
+    init_db(app)
     return app
 
 #Allows for a user object to be returned once they have been identified within the database.
@@ -79,8 +80,6 @@ def user_lookup_callback(_jwt_header, jwt_data):
     return User.query.filter_by(email=identity).one_or_none()
 
 
-if __name__ == "__main__":
-    app = create_app()
-    init_db(app)
+app = create_app()
 
 
