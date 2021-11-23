@@ -1,5 +1,6 @@
 import os, tempfile, pytest, logging
 from App.controllers.pothole import getAllPotholes
+from App.controllers.report import reportPotholeDriver
 from App.controllers.user import getOneRegisteredUser
 from App.main import create_app, init_db
 import time
