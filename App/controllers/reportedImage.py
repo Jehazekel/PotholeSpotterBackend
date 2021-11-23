@@ -85,7 +85,7 @@ def deletePotholeReportImage(user, potholeID, reportID, imageID):
             #Deletes the found image from the database, commits the change, and returns a success message along with a 'OK' http status code.
             db.session.delete(foundImage)
             db.session.commit()
-            return {"message" : "Pothole image succesfully deleted!"}, 200
+            return {"message" : "Pothole image successfully deleted!"}, 200
         except:
         #If an error has occurred, rollback the database and return an error and an "INTERNAL SERVER ERROR" http status code.
             db.session.rollback()
