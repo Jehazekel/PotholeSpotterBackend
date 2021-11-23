@@ -87,47 +87,47 @@ def testNoIndividualReportImage(empty_db):
     assert b"Pothole image not found!" in response.data and response.status_code == 404
 
 
-# Unit Test 10:
+# Unit Test 10: /api/potholes/<potholeID> should return the pothole data for an existing pothole, and a return status of 200.
 def testGetExistingPothole(simulated_db):
     potholeJson = b'{"potholeID": 1, "longitude": -61.277001, "latitude": 10.726551, "constituencyID": "arima", "expiryDate": "2021-12-23"}'
     response = simulated_db.get("/api/potholes/1")
     assert potholeJson in response.data and response.status_code == 200
 
-# Unit Test 11:
+# Unit Test 11: /api/potholes/<potholeID> should return an error for a non-existent pothole, and a return status of 404.
 def testGetNonExistentPothole(simulated_db):
     response = simulated_db.get("/api/potholes/3")
     assert b"No pothole data for that ID." in response.data and response.status_code == 404
 
-# Unit Test 12:
+# Unit Test 12: /api/potholes/<potholeID>/report/<reportID> should return the report data for an existing report, and a return status of 200.
 def testGetExistingReport(simulated_db):
     reportJson = b'{"reportID": 1, "userID": 1, "potholeID": 1, "dateReported": "2021-11-23", "description": "Very large pothole spanning both lanes of the road.", "votes": [], "reportedImages": [{"imageID": 1, "reportID": 1, "imageURL": "https://www.howtogeek.com/wp-content/uploads/2018/08/Header.png"}]}'
     response = simulated_db.get("/api/reports/pothole/1/report/1")
     assert reportJson in response.data and response.status_code == 200
 
-# Unit Test 13:
+# Unit Test 13: /api/potholes/<potholeID> should return an error for a non-existent report, and a return status of 404.
 def testGetNonExistentReport(simulated_db):
     response = simulated_db.get("/api/reports/pothole/1/report/15")
     assert b"No report found." in response.data and response.status_code == 404
 
-# Unit Test 14:
+# Unit Test 14: /api/potholes/<potholeID> should return an array of reports for a pothole, and a return status of 200.
 def testGetAllReportsForPothole(simulated_db):
     reportsJson = b'[{"reportID": 1, "userID": 1, "potholeID": 1, "dateReported": "2021-11-23", "description": "Very large pothole spanning both lanes of the road.", "votes": [], "reportedImages": [{"imageID": 1, "reportID": 1, "imageURL": "https://www.howtogeek.com/wp-content/uploads/2018/08/Header.png"}]}, {"reportID": 2, "userID": 2, "potholeID": 1, "dateReported": "2021-11-23", "description": "Small pothole in center of road", "votes": [], "reportedImages": [{"imageID": 2, "reportID": 2, "imageURL": "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg"}]}, {"reportID": 3, "userID": 3, "potholeID": 1, "dateReported": "2021-11-23", "description": "Very large pothole.", "votes": [], "reportedImages": [{"imageID": 3, "reportID": 3, "imageURL": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8&w=1000&q=80"}]}, {"reportID": 4, "userID": 4, "potholeID": 1, "dateReported": "2021-11-23", "description": "Pothole submitted via Driver Mode.", "votes": [], "reportedImages": []}, {"reportID": 5, "userID": 5, "potholeID": 1, "dateReported": "2021-11-23", "description": "Pothole submitted via Driver Mode.", "votes": [], "reportedImages": []}, {"reportID": 6, "userID": 6, "potholeID": 1, "dateReported": "2021-11-23", "description": "Pothole submitted via Driver Mode.", "votes": [], "reportedImages": []}]'
     response = simulated_db.get("/api/reports/pothole/1")
     assert reportsJson in response.data and response.status_code == 200
 
-# Unit Test 15:
+# Unit Test 15: /api/potholes/<potholeID>/report/<reportID>/images should return an array of images for a report, and a return status of 200.
 def testGetAllReportImagesForPothole(simulated_db):
     imagesJson = b'[{"imageID": 1, "reportID": 1, "imageURL": "https://www.howtogeek.com/wp-content/uploads/2018/08/Header.png"}]'
     response = simulated_db.get("/api/reports/pothole/1/report/1/images")
     assert imagesJson in response.data and response.status_code == 200
 
-# Unit Test 16:
+# Unit Test 16: /api/potholes/<potholeID>/report/<reportID>/images/<imageID> should return an image for a report, and a return status of 200.
 def testGetIndividualReportImage(simulated_db):
     imageJson = b'{"imageID": 1, "reportID": 1, "imageURL": "https://www.howtogeek.com/wp-content/uploads/2018/08/Header.png"}'
     response = simulated_db.get("/api/reports/pothole/1/report/1/images/1")
     assert imageJson in response.data and response.status_code == 200
 
-# Unit Test 17:
+# Unit Test 17: /api/potholes/<potholeID>/report/<reportID>/images/<imageID> should return an error for a non-existent image, and a return status of 404.
 def testGetNonExistentIndividualReportImage(simulated_db):
     response = simulated_db.get("/api/reports/pothole/1/report/1/images/13")
     assert b"Pothole image not found!" in response.data and response.status_code == 404
@@ -154,7 +154,7 @@ def testRegisterExistingUser(empty_db):
     r = registerUserController({'firstName' : 'Danny', 'lastName' : 'Phantom', 'email' : 'DansPhantom1@gmail.com', 'password' : 'danny123', 'confirmPassword' : 'danny123', 'agreeToS' : True})
     assert "User already exists!" in r[0]["error"]
 
-# Integration Test 4:
+# Integration Test 4: reportPotholeDriver should return a success message when reporting a pothole with valid data.
 def testAddNewPotholeReportDriver(users_in_db):
     reportDetails = {
         "longitude" : -61.277001,
@@ -182,7 +182,7 @@ def testAddNewPotholeReportDriver(users_in_db):
     assert check1 and check2 and "Successfully added pothole report to database!" in r[0]["message"] and r[1] == 201
 
 
-# Integration Test 5:
+# Integration Test 5: reportPotholeStandard should return a success message when reporting a pothole with valid data.
 def testAddNewPotholeReportStandard(users_in_db):
     reportDetails = {
         "longitude" : -61.277001,
@@ -205,8 +205,6 @@ def testAddNewPotholeReportStandard(users_in_db):
         if reportDetails["description"] == oneReportByUser["description"] and reportDetails["images"][0] == oneReportByUser["reportedImages"][0]["imageURL"]:
             check2 = True
 
-
-
     rPotholes = getAllPotholes()
     check1 = False
     for pothole in rPotholes:
@@ -215,7 +213,7 @@ def testAddNewPotholeReportStandard(users_in_db):
 
     assert check1 and check2 and "Successfully added pothole report to database!" in r[0]["message"] and r[1] == 201
 
-# Integration Test 6:
+# Integration Test 6: reportPothole(driver/standard) should return a expiry reset message when reporting a pothole that they previously reported.
 def testDuplicateReportSameUser(simulated_db):
     reportDetails = {
         "longitude" : -61.277001,
@@ -229,7 +227,7 @@ def testDuplicateReportSameUser(simulated_db):
     assert "Expiry date of pothole has been reset!" in r[0]["message"] and r[1] == 201
 
 
-# Integration Test 6:
+# Integration Test 6: reportPotholeDriver should return a success message when reporting the same pothole using 2 different users.
 def testMultipleReportsSamePothole(users_in_db):
     reportDetails = {
         "longitude" : -61.454274,
@@ -248,7 +246,7 @@ def testMultipleReportsSamePothole(users_in_db):
 
     assert user1Reports[0]["potholeID"] == user2Reports[0]["potholeID"]
 
-# Integration Test 7:
+# Integration Test 7: deletePotholeReportImage should return a success message when deleting a pothole image as the owner.
 def testDeleteExistingPotholeImage(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
 
@@ -264,7 +262,7 @@ def testDeleteExistingPotholeImage(simulated_db):
 
     assert reportedImageBefore != reportedImageAfter and "Pothole image successfully deleted!" in res[0]["message"]
 
-# Integration Test 8:
+# Integration Test 8: deletePotholeReportImage should not allow a user to delete a pothole image that is not owned.
 def testDeleteExistingPotholeImageNotOwner(simulated_db):
     user2 = getOneRegisteredUser("tester2@yahoo.com")
 
@@ -280,7 +278,7 @@ def testDeleteExistingPotholeImageNotOwner(simulated_db):
 
     assert reportedImageBefore == reportedImageAfter
 
-# Integration Test 9: 
+# Integration Test 9: deletePotholeReportImage should return an error message when deleting a pothole image that does not exist.
 def testDeleteNonExistentPotholeImage(simulated_db):
     user2 = getOneRegisteredUser("tester2@yahoo.com")
 
@@ -292,10 +290,9 @@ def testDeleteNonExistentPotholeImage(simulated_db):
 
     assert "Pothole image not found!" in reportedImageResult[0]["error"]
 
-# Integration Test 10:
+# Integration Test 10: deletePotholeReportImage should return an error message when adding a pothole image to a report that they are not the owner of.
 def testAddPotholeImageNotOwner(simulated_db):
     user2 = getOneRegisteredUser("tester2@yahoo.com")
-    expected = '{"imageID": 1, "reportID": 1, "imageURL": "https://www.howtogeek.com/wp-content/uploads/2018/08/Header.png"}'
     potholeID = 1
     reportID = 1
     imageDetails = {
@@ -308,7 +305,7 @@ def testAddPotholeImageNotOwner(simulated_db):
 
     assert "You are not the creator of this report!" in rv[0]["error"]
 
-# Integration Test 11:
+# Integration Test 11: addPotholeReportImage should return a success message when adding a pothole image to a report that is valid.
 def testAddPotholeImage(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 1
@@ -323,7 +320,7 @@ def testAddPotholeImage(simulated_db):
 
     assert "All images successfully added." in rv[0]["message"] and rv[1] == 201 and "https://media.gettyimages.com/photos/balanced-stones-on-a-pebble-beach-during-sunset-picture-id157373207?s=612x612" in res[0]
 
-# Integration Test 12:
+# Integration Test 12: addPotholeReportImage should return an error message when adding an invalid pothole image to a report that is valid.
 def testAddPotholeImageInvalidImageURL(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 1
@@ -336,7 +333,7 @@ def testAddPotholeImageInvalidImageURL(simulated_db):
 
     assert "error" in rv[0] and rv[1] == 206
 
-# Integration Test 13:
+# Integration Test 13: updateReportDescription should return a success message when updating a report that the user is owner of.
 def testUpdatePotholeDescriptionAsOwner(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 1
@@ -351,7 +348,7 @@ def testUpdatePotholeDescriptionAsOwner(simulated_db):
 
     assert "Pothole report description updated!" in rv[0]["message"] and 200 == rv[1] and '"description": "Wide pothole!"' in updatedReport[0]
 
-# Integration Test 14:
+# Integration Test 14: updateReportDescription should return an error message when updating a report that the user is not the owner of.
 def testUpdatePotholeDescriptionAsNonOwner(simulated_db):
     user2 = getOneRegisteredUser("tester2@yahoo.com")
     potholeID = 1
@@ -365,7 +362,7 @@ def testUpdatePotholeDescriptionAsNonOwner(simulated_db):
     assert "Report does not exist!" in rv[0]["error"] and 404 == rv[1]
 
 
-# Integration Test 15:
+# Integration Test 15: updateReportDescription should return an error message when updating a report that does not exist.
 def testUpdatePotholeDescriptionNonExistent(simulated_db):
     user2 = getOneRegisteredUser("tester2@yahoo.com")
     potholeID = 12
@@ -378,7 +375,7 @@ def testUpdatePotholeDescriptionNonExistent(simulated_db):
 
     assert "Report does not exist!" in rv[0]["error"] and 404 == rv[1]
 
-# Integration Test 16:
+# Integration Test 16: deleteUserPotholeReport should return a success message when deleting a report that is owned.
 def testDeleteIndividualReportAsOwner(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 1
@@ -390,7 +387,7 @@ def testDeleteIndividualReportAsOwner(simulated_db):
     assert "Successfully deleted report." in rv[0]["message"] and 200 == rv[1] and "No report found." in oldRep[0]
 
 
-# Integration Test 17:
+# Integration Test 17: deleteUserPotholeReport should return an error message when deleting a report that is not owned.
 def testDeleteIndividualReportAsNonOwner(simulated_db):
     user2 = getOneRegisteredUser("tester2@yahoo.com")
     potholeID = 1
@@ -401,7 +398,7 @@ def testDeleteIndividualReportAsNonOwner(simulated_db):
 
     assert "Report does not exist! Unable to delete." in rv[0]["error"] and 404 == rv[1] and "No report found." not in oldRep[0]
 
-# Integration Test 18:
+# Integration Test 18: deleteUserPotholeReport should return an error message when deleting a report that does not exist.
 def testDeleteIndividualReportNonExistent(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 12
@@ -411,7 +408,7 @@ def testDeleteIndividualReportNonExistent(simulated_db):
 
     assert "Report does not exist! Unable to delete." in rv[0]["error"] and 404 == rv[1]
 
-# Integration Test 19:
+# Integration Test 19: deleteUserPotholeReport should also delete the pothole if the report was the last report for that pothole.
 def testDeleteLastReportDeletesPothole(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 1
@@ -427,7 +424,7 @@ def testDeleteLastReportDeletesPothole(simulated_db):
     assert "Successfully deleted report." in rv[0]["message"] and 200 == rv[1] and "No report found." in oldRep[0] and potholeBeforeDelete == potholeAfterDelete
 
 
-# Integration Test 20:
+# Integration Test 20: calculateNetVotes should return the number of upvotes-downvotes for a report.
 def testCalculateNetVotes(simulated_db):
     potholeID = 1
     reportID = 1
@@ -448,7 +445,7 @@ def testCalculateNetVotes(simulated_db):
 
     assert netVotes == -1
 
-# Integration Test 21:
+# Integration Test 21: reports are automatically deleted if they exceed the negative report threshold.
 def testDeleteReportAfterNegativeVoteThreshold(simulated_db):
     potholeID = 1
     reportID = 1
@@ -473,7 +470,7 @@ def testDeleteReportAfterNegativeVoteThreshold(simulated_db):
 
     assert "No report found." in repAfter[0] and 404 == repAfter[1] and "No report found." not in repBefore
 
-# Integration Test 22:
+# Integration Test 22: voteOnPothole should change the number of votes for a report.
 def testVoteOnPothole(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 1
@@ -485,7 +482,7 @@ def testVoteOnPothole(simulated_db):
 
     assert votesBefore != votesAfter
 
-# Integration Test 23:
+# Integration Test 23: voteOnPothole should unvote on a report if it is submitted to the same report twice with the same vote.
 def testUnVoteOnPothole(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 1
@@ -498,7 +495,7 @@ def testUnVoteOnPothole(simulated_db):
 
     assert votesBefore == votesAfter
 
-# Integration Test 23:
+# Integration Test 24: voteOnPothole should change the vote for a pothole report.
 def testChangeVoteOnPothole(simulated_db):
     user1 = getOneRegisteredUser("tester1@yahoo.com")
     potholeID = 1
@@ -513,7 +510,7 @@ def testChangeVoteOnPothole(simulated_db):
     assert votesBefore != votesAfter != votesMidway
 
 
-# Integration Test 24: Login Controller should return the access token of a user if the credentials are correct, and a status code of 200
+# Integration Test 25: Login Controller should return the access token of a user if the credentials are correct, and a status code of 200
 def testLoginValid(users_in_db):
     email = "tester1@yahoo.com"
     password = "121233"
@@ -521,7 +518,7 @@ def testLoginValid(users_in_db):
     rv = loginUserController({"email" : email, "password": password})
     assert 'access_token' in rv[0] and rv[1] == 200
 
-# Integration Test 25: /login should return an error message if the credentials are invalid, and a status code of 401
+# Integration Test 26: /login should return an error message if the credentials are invalid, and a status code of 401
 def testLoginInvalidData(users_in_db):
     email = "invalidemail"
     password = "121233"
