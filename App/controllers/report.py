@@ -365,3 +365,9 @@ def getIndividualPotholeReport(potholeID, reportID):
         return json.dumps({"error": "No report found."}), 404
 
 
+##################### TEST CONTROLLERS #####################
+
+def getAllPotholeReportsByUser(user):
+    allReports = db.session.query(Report).filter_by(userID=user.userID).all()
+    allReports = [r.toDict() for r in allReports]
+    return allReports

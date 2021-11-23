@@ -17,7 +17,7 @@ For the first prototype of the application, the following features have been imp
 * Voting on a report of a pothole.
 
 ## POSTMAN COLLECTIONS
-* [SpotDPothole Postman Collections](http://spotdpothole.justinbaldeo.com/postmanCollection)
+* [SpotDPothole Postman Collections](https://linktr.ee/spotDPothole)
 
 ## DEPENDENCIES
 * [Python3](https://www.python.org/downloads/) - Python as main programming language.

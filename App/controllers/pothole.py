@@ -61,3 +61,11 @@ def deleteExpiredPotholes():
     #Iterates over all of the expired potholes and deletes them.
     for pothole in expiredPotholes:
         deletePothole(pothole.potholeID)
+
+
+##################### TEST CONTROLLERS #####################
+
+def getAllPotholes():
+    allReports = db.session.query(Pothole).filter_by().all()
+    allReports = [r.toDict() for r in allReports]
+    return allReports

@@ -9,9 +9,11 @@ from flask import Flask, request, session
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager, current_user
 from sqlalchemy.exc import IntegrityError, OperationalError
 import json
+from App.controllers.report import reportPotholeStandard
 
-#Imports all of the models from the application.
+#Imports all of the models and controllers from the application.
 from App.models import *
+from App.controllers import *
 
 #Facilitates the registration of a user in the application given a dictionary containing registration information.
 #The appropriate outcome and status codes are then returned.
@@ -152,6 +154,14 @@ def createTestUsers():
         "confirmPassword" : "121233",
         "agreeToS": True
     })
+    registerUserController({
+        "email" : "tester6@yahoo.com",
+        "firstName" : "Terrence",
+        "lastName" : "Williams",
+        "password" : "121233",
+        "confirmPassword" : "121233",
+        "agreeToS": True
+    })
 
 def getAllRegisteredUsers():
     allUsers = User.query.all()
@@ -160,3 +170,70 @@ def getAllRegisteredUsers():
 def getOneRegisteredUser(email):
     testUser = db.session.query(User).filter_by(email=email).first()
     return testUser
+
+def createSimulatedData():
+    createTestUsers()
+
+    reportDetails1 = {
+        "longitude" : -61.277001,
+        "latitude" : 10.726551,
+        "constituencyID" : "arima",
+        "description": "Very large pothole spanning both lanes of the road.",
+        "images" : [
+            "https://www.howtogeek.com/wp-content/uploads/2018/08/Header.png"
+        ]
+    }
+
+    reportDetails2 = {
+        "longitude" : -61.395376,
+        "latitude" : 10.511998,
+        "constituencyID" : "chaguanas",
+        "description": "Small pothole in center of road",
+        "images" : [
+            "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg"
+        ]
+    }
+
+    reportDetails3 = {
+        "longitude" : -61.400837,
+        "latitude" : 10.502230,
+        "constituencyID" : "chaguanas",
+        "description": "Very large pothole.",
+        "images" : [
+            "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8&w=1000&q=80"
+        ]
+    }
+
+    reportDetails4 = {
+        "longitude" : -61.277000,
+        "latitude" : 10.726550,
+        "constituencyID" : "arima",
+    }
+
+    reportDetails5 = {
+        "longitude" : -61.452443,
+        "latitude" : 10.650744,
+        "constituencyID" : "san_juan",
+    }
+
+    reportDetails6 = {
+        "longitude" : -61.466627,
+        "latitude" : 10.648361,
+        "constituencyID" : "san_juan",
+    }
+
+    user1 = getOneRegisteredUser("tester1@yahoo.com")
+    user2 = getOneRegisteredUser("tester2@yahoo.com")
+    user3 = getOneRegisteredUser("tester3@yahoo.com")
+    user4 = getOneRegisteredUser("tester4@yahoo.com")
+    user5 = getOneRegisteredUser("tester5@yahoo.com")
+    user6 = getOneRegisteredUser("tester6@yahoo.com")
+
+
+
+    reportPotholeStandard(user1, reportDetails1)
+    reportPotholeStandard(user2, reportDetails2)
+    reportPotholeStandard(user3, reportDetails3)   
+    reportPotholeDriver(user4, reportDetails4)
+    reportPotholeDriver(user5, reportDetails5)
+    reportPotholeDriver(user6, reportDetails6)
