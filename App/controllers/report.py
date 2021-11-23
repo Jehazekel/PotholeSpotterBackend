@@ -18,6 +18,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from geopy import distance
 from datetime import datetime, timedelta
 import json, requests
+from App.controllers.pothole import deletePothole
 
 #Imports the all of the models and controllers of the application.
 from App.models import *
