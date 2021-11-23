@@ -23,11 +23,10 @@ jwt = JWTManager()
 
 #Loads the configuration into the application from either a config file, or using environment variables.
 def loadConfig(app, config):
-    #Attempts to configure the application from a configuration file if in development mode.
-    app.config['ENV'] = os.environ.get('ENV', 'development')
-    if(app.config['ENV'] == "development"):
+    #Attempts to configure the application from a configuration file.
+    try:
         app.config.from_object('App.config.development')
-    else:
+    except:
     #If no configuration file is present, use the environment variables of the host to configure the application.
         print("Config file not present. Using environment variables.")
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
