@@ -89,8 +89,9 @@ def testNoIndividualReportImage(empty_db):
 
 # Unit Test 10: /api/potholes/<potholeID> should return the pothole data for an existing pothole, and a return status of 200.
 def testGetExistingPothole(simulated_db):
-    potholeJson = b'{"potholeID": 1, "longitude": -61.277001, "latitude": 10.726551, "constituencyID": "arima", "expiryDate": "2021-12-23"}'
+    potholeJson = b'{"potholeID": 1, "longitude": -61.277001, "latitude": 10.726551, "constituencyID": "arima"'
     response = simulated_db.get("/api/potholes/1")
+    print(response.data)
     assert potholeJson in response.data and response.status_code == 200
 
 # Unit Test 11: /api/potholes/<potholeID> should return an error for a non-existent pothole, and a return status of 404.
@@ -100,7 +101,7 @@ def testGetNonExistentPothole(simulated_db):
 
 # Unit Test 12: /api/potholes/<potholeID>/report/<reportID> should return the report data for an existing report, and a return status of 200.
 def testGetExistingReport(simulated_db):
-    reportJson = b'{"reportID": 1, "userID": 1, "potholeID": 1, "dateReported": "2021-11-23", "description": "Very large pothole spanning both lanes of the road.", "votes": [], "reportedImages": [{"imageID": 1, "reportID": 1, "imageURL": "https://www.howtogeek.com/wp-content/uploads/2018/08/Header.png"}]}'
+    reportJson = b'{"reportID": 1, "userID": 1, "potholeID": 1,'
     response = simulated_db.get("/api/reports/pothole/1/report/1")
     assert reportJson in response.data and response.status_code == 200
 
@@ -111,7 +112,7 @@ def testGetNonExistentReport(simulated_db):
 
 # Unit Test 14: /api/potholes/<potholeID> should return an array of reports for a pothole, and a return status of 200.
 def testGetAllReportsForPothole(simulated_db):
-    reportsJson = b'[{"reportID": 1, "userID": 1, "potholeID": 1, "dateReported": "2021-11-23", "description": "Very large pothole spanning both lanes of the road.", "votes": [], "reportedImages": [{"imageID": 1, "reportID": 1, "imageURL": "https://www.howtogeek.com/wp-content/uploads/2018/08/Header.png"}]}, {"reportID": 2, "userID": 2, "potholeID": 1, "dateReported": "2021-11-23", "description": "Small pothole in center of road", "votes": [], "reportedImages": [{"imageID": 2, "reportID": 2, "imageURL": "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg"}]}, {"reportID": 3, "userID": 3, "potholeID": 1, "dateReported": "2021-11-23", "description": "Very large pothole.", "votes": [], "reportedImages": [{"imageID": 3, "reportID": 3, "imageURL": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8&w=1000&q=80"}]}, {"reportID": 4, "userID": 4, "potholeID": 1, "dateReported": "2021-11-23", "description": "Pothole submitted via Driver Mode.", "votes": [], "reportedImages": []}, {"reportID": 5, "userID": 5, "potholeID": 1, "dateReported": "2021-11-23", "description": "Pothole submitted via Driver Mode.", "votes": [], "reportedImages": []}, {"reportID": 6, "userID": 6, "potholeID": 1, "dateReported": "2021-11-23", "description": "Pothole submitted via Driver Mode.", "votes": [], "reportedImages": []}]'
+    reportsJson = b'[{"reportID": 1, "userID": 1, "potholeID": 1,'
     response = simulated_db.get("/api/reports/pothole/1")
     assert reportsJson in response.data and response.status_code == 200
 
