@@ -5,6 +5,7 @@
 #Import Modules
 from flask import Flask, request
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 import os
 
 #Imports the models and views of the application.
@@ -53,6 +54,7 @@ def init_db(app):
 #Creates the application, loads the configuration, adds the views, initializes the database, creates the JWT manager, and returns the application context.
 def create_app(config={}):
     app = Flask(__name__)
+    CORS(app)
     loadConfig(app, config)
     addViews(app, views)
     db.init_app(app)
