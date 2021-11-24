@@ -69,3 +69,9 @@ def getAllPotholes():
     allReports = db.session.query(Pothole).filter_by().all()
     allReports = [r.toDict() for r in allReports]
     return allReports
+
+def nukePotholesInDB():
+    allPotholes = db.session.query(Pothole).all()
+    for pothole in allPotholes:
+        db.session.delete(pothole)
+        db.session.commit()
