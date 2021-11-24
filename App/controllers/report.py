@@ -64,12 +64,13 @@ def findClosestPothole(latitude, longitude):
     potholeQuery = db.session.query(Pothole).all()
     #Iterates over all of the potholes in the database and calculates the distance between the pothole and the report location.
     for pothole in potholeQuery:
-        centerPotholeCoords = (latitude, longitude)
+        centerPotholeCoords = (pothole.latitude, pothole.longitude)
         distanceBetweenPotholes = distance.distance(centerPotholeCoords, newPotholeCoords) * 1000
-        
+
         #If the distance between the current pothole is less than the smallest distance, set the finalPothole to match the current pothole.
         #This effectively finds the nearest pothole, within the distance threshold, that the report can be matched to.
         if distanceBetweenPotholes < smallestDistance:
+            
             finalPothole = pothole
 
     #Returns the final pothole to be used for the report.
