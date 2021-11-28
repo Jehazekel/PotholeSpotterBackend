@@ -31,6 +31,7 @@ manager.add_command('db', MigrateCommand)
 @manager.command
 def initDB():
     db.create_all(app=app)
+    createSimulatedData()
     print('Database Initialized!')
 
 #Defines code that should be run at startup of the server.
