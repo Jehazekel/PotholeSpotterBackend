@@ -31,14 +31,15 @@ def loadConfig(app, config):
     #If no configuration file is present, use the environment variables of the host to configure the application.
         print("Config file not present. Using environment variables.")
         
-        app.config['SECRET_KEY'] = "DEFAULT_SECRET_KEY"
-        app.config['JWT_SECRET_KEY'] = "secret"
         app.config['JWT_EXPIRATION_DELTA'] = 7
-        app.config['DEBUG'] = True
-        app.config['ENV'] = "development"
 
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///spotDPothole.db" 
-        #if SQLITEDB in ["True", "true", "TRUE"] else os.environ.get('DBURI')
+        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') if os.environ.get('SECRET_KEY') != None else "DEFAULT_SECRET_KEY"
+        app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+        app.config['ENV'] = os.environ.get('ENV')
+        SQLITEDB = os.environ.get("SQLITEDB", default="False") 
+
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///spotDPothole.db" if SQLITEDB in ["True", "true", "TRUE"] else os.environ.get('DBURI')
+        
 
     
     #Used to initialize db for fixture
